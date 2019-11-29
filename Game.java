@@ -17,7 +17,7 @@ import javafx.scene.text.TextAlignment;
  */
 public class Game {
 
-    private final int winningScore = 3;
+    private final int winningScore = 1;
 
     protected final double H, W;
 
@@ -25,7 +25,7 @@ public class Game {
     protected Paddle paddleR;
     protected Ball ball;
 
-    int scoreL = 0, scoreR = 0;
+    private int scoreL = 0, scoreR = 0;
 
     int reboundCounter, accelerationCounter;
     static double[] angles = new double[4];
@@ -39,14 +39,9 @@ public class Game {
         iniAngle();
     }
 
-    public Game() {
-        H = 5;
-        W = 5;
-    }
-
-    //Runs logic of game
     public void animationHandle(GraphicsContext gc,
             boolean up1, boolean down1, boolean up2, boolean down2) {
+
         movePaddle(up1, down1, up2, down2);
 
         if (ball.getY() < 0 || ball.getY() + ball.getDiameter() > H) {
@@ -72,13 +67,12 @@ public class Game {
         gc.setFont(new Font(30));
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.TOP);
-        gc.fillText(Integer.toString(this.scoreR), W - 60, 30);
-        gc.fillText(Integer.toString(this.scoreL), 60, 30);
+        gc.fillText(Integer.toString(this.getScoreR()), W - 60, 30);
+        gc.fillText(Integer.toString(this.getScoreL()), 60, 30);
         ball.move(gc);
         paddleL.refill(gc);
         paddleR.refill(gc);
         double a;
-
         if ((a = collisionDetection(paddleL, paddleR, ball)) != 10) {
             ball.setySpeed(ball.getxSpeed() * a);
             ball.setxSpeed(ball.getxSpeed() * -1);
@@ -153,7 +147,6 @@ public class Game {
         return 10;
     }
 
-    //returns true if ball hits upper or downer side of paddle otherwise returns false 
     protected boolean ballCollision(Paddle paddleL, Paddle paddleR, Ball ball) {
         return ball.getX() + 20 > paddleR.getX() && ball.getX() < paddleR.getX() + paddleR.getWidth() && ball.getY() < paddleR.getY() && ball.getY() > paddleR.getY() - 20
                 || ball.getX() + 20 > paddleR.getX() && ball.getX() < paddleR.getX() + paddleR.getWidth() && ball.getY() > paddleR.getY() + paddleR.getHeight() - 20 && ball.getY() < paddleR.getY() + paddleR.getHeight()
@@ -164,14 +157,14 @@ public class Game {
     public int scoreChecking(double W) {
         if (ball.getX() + 20 > W) {
             this.scoreL++;
-            if (this.scoreL == this.getWinningScore()) {
+            if (this.getScoreL() == this.getWinningScore()) {
                 return 0;
             } else {
                 return 2;
             }
         } else if (ball.getX() < 0) {
             this.scoreR++;
-            if (this.scoreR == this.getWinningScore()) {
+            if (this.getScoreR() == this.getWinningScore()) {
                 return 1;
             } else {
                 return 2;
@@ -189,6 +182,18 @@ public class Game {
         ball.move(gc);
     }
 
+    public void fillFrame(GraphicsContext gc) {
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, W, H);
+        gc.setFill(Color.WHITESMOKE);
+        gc.strokeLine(W / 2, 0, W / 2, H);
+        gc.setFont(new Font(30));
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setTextBaseline(VPos.TOP);
+        gc.fillText(Integer.toString(0), W - 60, 30);
+        gc.fillText(Integer.toString(0), 60, 30);
+    }
+
     private void iniAngle() {
         angles[0] = Math.tan(Math.toRadians(-30));
         angles[1] = Math.tan(Math.toRadians(-15));
@@ -196,10 +201,22 @@ public class Game {
         angles[3] = Math.tan(Math.toRadians(30));
     }
 
-    /**
-     * @return the winningScore
-     */
     public int getWinningScore() {
         return winningScore;
+    }
+
+    public int getScoreL() {
+        return scoreL;
+    }
+
+    public int getScoreR() {
+        return scoreR;
+    }
+
+    public void setDifficulty(int difficulty) {
+    }
+
+    public int getDifficulty() {
+        return 0;
     }
 }
