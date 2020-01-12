@@ -5,11 +5,14 @@
  */
 package pong;
 
+import java.nio.file.Paths;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.media.AudioClip;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
+import pong.options.Document;
 
 /**
  *
@@ -17,7 +20,7 @@ import javafx.scene.text.TextAlignment;
  */
 public class Game {
 
-    private final int winningScore = 1;
+    private int winningScore = 1;
 
     protected final double H, W;
 
@@ -25,39 +28,39 @@ public class Game {
     protected Paddle paddleR;
     protected Ball ball;
 
+    private AudioClip ac;
+    Document doc;
+
     private int scoreL = 0, scoreR = 0;
+    private int a, b;
 
-    int reboundCounter, accelerationCounter;
-    static double[] angles = new double[4];
+    private int reboundCounter, accelerationCounter;
+    private final double[] vectorX = new double[7];
+    private final double[] vectorY = new double[7];
 
-    public Game(double H, double W) {
+    public Game(double W, double H) {
         this.H = H;
         this.W = W;
+        doc = new Document();
+        winningScore = doc.getWinPoints();
         this.paddleL = new Paddle(10, (H - 80) / 2, 80, 20, 5);
         this.paddleR = new Paddle(W - 20 - 10, (H - 80) / 2, 80, 20, 5);
-        this.ball = new Ball((W - 20) / 2, (H - 20) / 2, 20, 4);
+        this.ball = new Ball((W - 20) / 2, (H - 20) / 2, 20, doc.getBallSpeed());
         iniAngle();
+        ac = new AudioClip(Paths.get("src\\pong\\pong.mp3").toUri().toString());
+        ac.setVolume(doc.getSoundVolume() / 100);
     }
 
     public void animationHandle(GraphicsContext gc,
-            boolean up1, boolean down1, boolean up2, boolean down2) {
+            boolean up1, boolean down1, boolean up2, boolean down2,
+            boolean pause) {
 
         movePaddle(up1, down1, up2, down2);
-
         if (ball.getY() < 0 || ball.getY() + ball.getDiameter() > H) {
             ball.setySpeed(ball.getySpeed() * -1);
         }
         if (accelerationCounter == 3) {
-            if (ball.getxSpeed() < 0) {
-                ball.setxSpeed(ball.getxSpeed() - 0.5);
-            } else {
-                ball.setxSpeed(ball.getxSpeed() + 0.5);
-            }
-            if (ball.getySpeed() < 0) {
-                ball.setySpeed(ball.getySpeed() - 0.5);
-            } else {
-                ball.setySpeed(ball.getySpeed() + 0.5);
-            }
+            ball.setSpeed(ball.getSpeed() + 0.5);
             accelerationCounter = 0;
         }
         gc.setFill(Color.BLACK);
@@ -72,11 +75,12 @@ public class Game {
         ball.move(gc);
         paddleL.refill(gc);
         paddleR.refill(gc);
-        double a;
-        if ((a = collisionDetection(paddleL, paddleR, ball)) != 10) {
-            ball.setySpeed(ball.getxSpeed() * a);
-            ball.setxSpeed(ball.getxSpeed() * -1);
+        if ((a = collisionDetection(paddleR, ball)) != 10) {
+            hit(a);
+        } else if ((a = collisionDetection(paddleL, ball)) != 10) {
+            hit(a);
         }
+
         if (ballCollision(paddleL, paddleR, ball)) {
             ball.setySpeed(ball.getySpeed() * -1);
         }
@@ -106,42 +110,37 @@ public class Game {
         }
     }
 
-    protected double collisionDetection(Paddle paddleL, Paddle paddleR, Ball ball) {
-        if (ball.getX() + 20 >= paddleR.getX() && ball.getX() + 20 <= paddleR.getX() + 5 && ball.getY() + 20 > paddleR.getY() && ball.getY() < paddleR.getY() + paddleR.getHeight()) {
+    protected void hit(int a) {
+        if (doc.getSound()) {
+            ac.play();
+        }
+        ball.setySpeed(ball.getSpeed() * vectorY[a]);
+        if (ball.getxSpeed() < 0) {
+            ball.setxSpeed(ball.getSpeed() * vectorX[a]);
+        } else {
+            ball.setxSpeed(ball.getSpeed() * vectorX[a] * -1);
+        }
+    }
+
+    protected int collisionDetection(Paddle paddle, Ball ball) {
+        if ((ball.getX() + 20 >= paddle.getX() && ball.getX() + 20 <= paddle.getX() + ball.getSpeed() && ball.getY() + 20 > paddle.getY() && ball.getY() < paddle.getY() + paddle.getHeight())
+                || (ball.getX() <= paddle.getX() + paddle.getWidth() && ball.getX() >= paddle.getX() + paddle.getWidth() - ball.getSpeed() && ball.getY() + 20 > paddle.getY() && ball.getY() < paddle.getY() + paddle.getHeight())) {
             reboundCounter++;
             accelerationCounter++;
-            if (ball.getY() + ball.getDiameter() > paddleR.getY() && ball.getY() + ball.getRadius() < paddleR.getY() + paddleR.getHeight() / 8) {
+            if (ball.getY() + ball.getDiameter() > paddle.getY() && ball.getY() + ball.getRadius() < paddle.getY() + paddle.getHeight() / 8) {
+                return 6;
+            } else if (ball.getY() + ball.getDiameter() > paddle.getY() + paddle.getHeight() / 8 && ball.getY() + ball.getRadius() < paddle.getY() + 2 * (paddle.getHeight() / 8)) {
                 return 1;
-            } else if (ball.getY() + ball.getDiameter() > paddleR.getY() + paddleR.getHeight() / 8 && ball.getY() + ball.getRadius() < paddleR.getY() + 2 * (paddleR.getHeight() / 8)) {
-                return angles[0];
-            } else if (ball.getY() + ball.getDiameter() > paddleR.getY() + 2 * (paddleR.getHeight() / 8) && ball.getY() + ball.getRadius() < paddleR.getY() + 3 * (paddleR.getHeight() / 8)) {
-                return angles[1];
-            } else if (ball.getY() + ball.getDiameter() > paddleR.getY() + 3 * (paddleR.getHeight() / 8) && ball.getY() + ball.getRadius() < paddleR.getY() + 5 * (paddleR.getHeight() / 8)) {
+            } else if (ball.getY() + ball.getDiameter() > paddle.getY() + 2 * (paddle.getHeight() / 8) && ball.getY() + ball.getRadius() < paddle.getY() + 3 * (paddle.getHeight() / 8)) {
+                return 2;
+            } else if (ball.getY() + ball.getDiameter() > paddle.getY() + 3 * (paddle.getHeight() / 8) && ball.getY() + ball.getRadius() < paddle.getY() + 5 * (paddle.getHeight() / 8)) {
+                return 3;
+            } else if (ball.getY() + ball.getDiameter() > paddle.getY() + 5 * (paddle.getHeight() / 8) && ball.getY() + ball.getRadius() < paddle.getY() + 6 * (paddle.getHeight() / 8)) {
+                return 4;
+            } else if (ball.getY() + ball.getDiameter() > paddle.getY() + 6 * (paddle.getHeight() / 8) && ball.getY() + ball.getRadius() < paddle.getY() + 7 * (paddle.getHeight() / 8)) {
+                return 5;
+            } else if (ball.getY() + ball.getDiameter() > paddle.getY() + 7 * (paddle.getHeight() / 8) && ball.getY() < paddle.getY() + paddle.getHeight()) {
                 return 0;
-            } else if (ball.getY() + ball.getDiameter() > paddleR.getY() + 5 * (paddleR.getHeight() / 8) && ball.getY() + ball.getRadius() < paddleR.getY() + 6 * (paddleR.getHeight() / 8)) {
-                return angles[2];
-            } else if (ball.getY() + ball.getDiameter() > paddleR.getY() + 6 * (paddleR.getHeight() / 8) && ball.getY() + ball.getRadius() < paddleR.getY() + 7 * (paddleR.getHeight() / 8)) {
-                return angles[3];
-            } else if (ball.getY() + ball.getDiameter() > paddleR.getY() + 7 * (paddleR.getHeight() / 8) && ball.getY() < paddleR.getY() + paddleR.getHeight()) {
-                return -1;
-            }
-        } else if (ball.getX() <= paddleL.getX() + paddleL.getWidth() && ball.getX() >= paddleL.getX() + paddleL.getWidth() - 5 && ball.getY() + 20 > paddleL.getY() && ball.getY() < paddleL.getY() + paddleL.getHeight()) {
-            reboundCounter++;
-            accelerationCounter++;
-            if (ball.getY() + ball.getDiameter() > paddleL.getY() && ball.getY() + ball.getRadius() < paddleL.getY() + paddleR.getHeight() / 8) {
-                return -1;
-            } else if (ball.getY() + ball.getDiameter() > paddleL.getY() + paddleL.getHeight() / 8 && ball.getY() + ball.getRadius() < paddleL.getY() + 2 * (paddleL.getHeight() / 8)) {
-                return angles[3];
-            } else if (ball.getY() + ball.getDiameter() > paddleL.getY() + 2 * (paddleL.getHeight() / 8) && ball.getY() + ball.getRadius() < paddleL.getY() + 3 * (paddleL.getHeight() / 8)) {
-                return angles[2];
-            } else if (ball.getY() + ball.getDiameter() > paddleL.getY() + 3 * (paddleL.getHeight() / 8) && ball.getY() + ball.getRadius() < paddleL.getY() + 5 * (paddleL.getHeight() / 8)) {
-                return 0;
-            } else if (ball.getY() + ball.getDiameter() > paddleL.getY() + 5 * (paddleL.getHeight() / 8) && ball.getY() + ball.getRadius() < paddleL.getY() + 6 * (paddleL.getHeight() / 8)) {
-                return angles[1];
-            } else if (ball.getY() + ball.getDiameter() > paddleL.getY() + 6 * (paddleL.getHeight() / 8) && ball.getY() + ball.getRadius() < paddleL.getY() + 7 * (paddleL.getHeight() / 8)) {
-                return angles[0];
-            } else if (ball.getY() + ball.getDiameter() > paddleL.getY() + 7 * (paddleL.getHeight() / 8) && ball.getY() < paddleL.getY() + paddleL.getHeight()) {
-                return 1;
             }
         }
         return 10;
@@ -182,6 +181,11 @@ public class Game {
         ball.move(gc);
     }
 
+    public void scoreReset() {
+        scoreL = 0;
+        scoreR = 0;
+    }
+
     public void fillFrame(GraphicsContext gc) {
         gc.setFill(Color.BLACK);
         gc.fillRect(0, 0, W, H);
@@ -195,10 +199,20 @@ public class Game {
     }
 
     private void iniAngle() {
-        angles[0] = Math.tan(Math.toRadians(-30));
-        angles[1] = Math.tan(Math.toRadians(-15));
-        angles[2] = Math.tan(Math.toRadians(15));
-        angles[3] = Math.tan(Math.toRadians(30));
+        vectorX[0] = Math.cos(Math.toRadians(-45));
+        vectorX[1] = Math.cos(Math.toRadians(-30));
+        vectorX[2] = Math.cos(Math.toRadians(-15));
+        vectorX[3] = 1;
+        vectorX[4] = Math.cos(Math.toRadians(15));
+        vectorX[5] = Math.cos(Math.toRadians(30));
+        vectorX[6] = Math.cos(Math.toRadians(45));
+        vectorY[0] = Math.sin(Math.toRadians(-45));
+        vectorY[1] = -0.5;
+        vectorY[2] = Math.sin(Math.toRadians(-15));
+        vectorY[3] = 0;
+        vectorY[4] = Math.sin(Math.toRadians(15));
+        vectorY[5] = 0.5;
+        vectorY[6] = Math.sin(Math.toRadians(45));
     }
 
     public int getWinningScore() {

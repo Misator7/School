@@ -20,7 +20,6 @@ public class DifMenu extends Menu {
 
     }
 
-    @Override
     protected boolean setResult(GraphicsContext gc) {
         difficulty = index;
         return true;

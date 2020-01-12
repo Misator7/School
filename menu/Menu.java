@@ -7,14 +7,12 @@ package pong.menu;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.geometry.VPos;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import pong.Game;
 import pong.Pong;
-import pong.SinglePlayer;
 
 /**
  *
@@ -23,9 +21,6 @@ import pong.SinglePlayer;
 public class Menu {
 
     protected int index = 0;
-    private int sizeSing = 45, sizeMulti = 30, sizeSet = 30;
-
-    private double sizeRestart = 15.5, extend = 0;
 
     protected Game game;
 
@@ -33,7 +28,7 @@ public class Menu {
 
     protected double H, W;
 
-    public Menu(double H, double W) {
+    public Menu(double W, double H) {
         this.H = H;
         this.W = W;
         initItems();
@@ -95,10 +90,7 @@ public class Menu {
             gc.setStroke(Color.WHITESMOKE);
             gc.fillText(item[i], W / 2, 300 + i * 70);
         }
-        if (enter) {
-            return setResult(gc);
-        }
-        return false;
+        return enter;
     }
 
     protected String getHeader() {
@@ -108,35 +100,13 @@ public class Menu {
     protected void initItems() {
         item[0] = "1 Player";
         item[1] = "2 Players";
-        item[2] = "Settings";
-    }
-
-    protected boolean setResult(GraphicsContext gc) {
-        switch (index) {
-            case 0:
-                game = new SinglePlayer(H, W);
-                game.fillFrame(gc);
-                break;
-            case 1:
-                game = new Game(H, W);
-                game.fillFrame(gc);
-
-                break;
-            case 2:
-                return false;
-        }
-        try {
-            Thread.sleep(700);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Pong.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return true;
+        item[2] = "Options";
     }
 
     /**
      * @return the game
      */
-    public Game getResult() {
-        return game;
+    public int getResult() {
+        return index;
     }
 }

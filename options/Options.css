@@ -1,0 +1,105 @@
+.background {
+    -fx-background-color: #1d1d1d;
+}
+
+.label {
+    -fx-font-size: 14pt;
+    -fx-text-fill: white;
+    -fx-opacity: 0.9;
+}
+
+.button {
+    -fx-background-color: #444444;
+    -fx-text-fill: white;
+    -fx-font-size: 10pt;
+    -fx-background-radius: 0;
+    -fx-pref-height: 30px;
+}
+.button:hover {
+    -fx-border-width: 2;
+    -fx-border-color: #888888;
+}
+
+.grid-pane {
+    -fx-padding: 0px;
+    -fx-pref-width: 400px;
+}
+#game-pane {
+    -fx-pref-height: 210px;
+}
+#sound-pane {
+    -fx-pref-height: 140px;
+}
+#graphic-pane {
+    -fx-pref-height: 70px;
+}
+
+.tab-pane {
+    -fx-background-color: #1d1d1d;
+}
+.tab-pane .tab {
+    -fx-pref-height: 45px;
+    -fx-pref-width: 110px;
+    -fx-text-fill: white;
+    -fx-font-size: 11pt;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-background-color: #444444;
+}
+.tab-pane .tab-label {
+    -fx-text-fill: white;
+}
+.tab-pane .tab:selected {
+    -fx-border-width: 0 0 5 0;
+    -fx-border-color: white;
+}
+.tab-pane .tab:selected .focus-indicator {
+    -fx-focus-color: transparent;
+    -fx-border-color: transparent;
+}
+.tab-pane .tab:focus {
+    -fx-focus-color: transparent;
+}
+.tab-pane .tab-header-background {
+    -fx-background-color: #444444;
+}
+.tab-pane:top .tab-header-area {
+    -fx-background-insets: 0 0 0 0;
+    -fx-padding: 0 0 0 0;
+}
+
+.choice-box {
+    -fx-background-color: #1d1d1d;
+    -fx-background-radius: 0;
+    -fx-border-width: 2px;
+    -fx-border-color: #444444;
+}
+.choice-box .context-menu {
+    -fx-background-color: #333333;
+}
+.choice-box .menu-item:focused {
+    -fx-background-color: #444444;
+}
+
+.check-box .box{
+    -fx-background-color: #1d1d1d;
+    -fx-border-width: 2px;
+    -fx-border-color: #444444;
+}
+
+.slider{
+    -fx-show-tick-marks: false;
+    -show-value-on-interaction: true;
+}
+.slider .track {
+    -fx-background-color: #666666;
+}
+.slider .bla  {
+    -fx-background-color: yellow;
+}
+.slider .thumb {
+    -fx-pref-height: 30;
+    -fx-pref-width: 9;
+    -fx-background-color: #555555;
+    -fx-background-radius: 3;
+}

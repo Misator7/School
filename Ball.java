@@ -15,7 +15,14 @@ import javafx.scene.paint.Color;
  */
 public class Ball {
 
-    private double x, y, xSpeed, ySpeed;
+    /**
+     * @param speed the speed to set
+     */
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+
+    private double x, y, xSpeed, ySpeed, speed;
     private final int diameter;
     private int radius;
     private Color color = Color.WHITESMOKE;
@@ -27,6 +34,7 @@ public class Ball {
         this.y = y;
         this.xSpeed = speed;
         this.ySpeed = speed;
+        this.speed = speed;
         randomDirect();
     }
 
@@ -134,5 +142,12 @@ public class Ball {
      */
     public void setRadius(int radius) {
         this.radius = radius;
+    }
+
+    /**
+     * @return the speed
+     */
+    public double getSpeed() {
+        return speed;
     }
 }

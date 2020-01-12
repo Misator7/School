@@ -17,7 +17,7 @@ public class SinglePlayer extends Game {
     public int difficulty;
     private Menu menu;
 
-    private Random ran = new Random();
+    private final Random ran = new Random();
     private int counter;
     private int x = 0;
     boolean bool = true;

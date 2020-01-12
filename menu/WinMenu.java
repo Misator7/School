@@ -59,14 +59,14 @@ public class WinMenu extends Menu {
         gc.fillText("Press ENTER to restart game", W / 2, H - 114);
         if (enter) {
             if (originalGame.getClass() == Game.class) {
-                this.game = new Game(H, W);
+                this.index = 1;
                 return true;
             } else if (originalGame.getClass() == SinglePlayer.class) {
-                this.game = new SinglePlayer(H, W);
-                game.setDifficulty(originalGame.getDifficulty());
+                this.index = 0;
                 return true;
             }
         } else if (backspace) {
+            this.index = 3;
             return true;
         }
         return false;
