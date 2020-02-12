@@ -18,23 +18,34 @@ import java.util.Properties;
  */
 public class Document {
 
-    private final String PATH = "src\\pong\\options\\config.properties";
+    private final String CONFIG = "rsrc\\config.properties";
+    private final String SCOREBOARD = "rsrc\\scoreboard.properties";
 
-    private Properties PROP;
+    private final Properties CONFIGPROP;
+    private final Properties SCOREPROP;
 
     public Document() {
-        PROP = loadValues();
+        CONFIGPROP = loadValues(CONFIG);
+        SCOREPROP = loadValues(SCOREBOARD);
     }
 
-    public void saveValues(Properties prop) {
-        try (OutputStream output = new FileOutputStream(PATH)) {
+    private void saveValues(Properties prop, String path) {
+        try (OutputStream output = new FileOutputStream(path)) {
             prop.store(output, null);
         } catch (IOException io) {
         }
     }
+    
+    public void saveConfig(Properties prop) {
+        saveValues(prop, CONFIG);
+    }
+    
+    public void saveScoreboard(Properties prop) {
+        saveValues(prop, SCOREBOARD);
+    }
 
-    public Properties loadValues() {
-        try (InputStream input = new FileInputStream(PATH)) {
+    private Properties loadValues(String path) {
+        try (InputStream input = new FileInputStream(path)) {
             Properties properties = new Properties();
             properties.load(input);
             return properties;
@@ -42,13 +53,30 @@ public class Document {
         }
         return null;
     }
+    
+    public Properties loadConfig() {
+        return loadValues(CONFIG);
+    }
+    
+    public Properties loadScoreboard() {
+        return loadValues(SCOREBOARD);
+    }
+    
+    public String[][] getScoreboard() {
+        String[][] scoreboard = new String[10][2];
+        for (int i = 0; i < 10; i++) {
+            scoreboard[i][0] = SCOREPROP.getProperty(Integer.toString(i) + "name");
+            scoreboard[i][1] = SCOREPROP.getProperty(Integer.toString(i) + "time");
+        }
+        return scoreboard;
+    }
 
     public int getWinPoints() {
-        return Integer.parseInt(PROP.getProperty("winPoints"));
+        return Integer.parseInt(CONFIGPROP.getProperty("winPoints"));
     }
 
     public int getBallSpeed() {
-        switch (PROP.getProperty("ballSpeed")) {
+        switch (CONFIGPROP.getProperty("ballSpeed")) {
             case "very slow":
                 return 3;
             case "slow":
@@ -65,18 +93,40 @@ public class Document {
     }
 
     public double getMusicVolume() {
-        return Double.parseDouble(PROP.getProperty("musicValue"));
+        return Double.parseDouble(CONFIGPROP.getProperty("musicValue"));
     }
 
     public boolean getMusic() {
-        return Boolean.parseBoolean(PROP.getProperty("music"));
+        return Boolean.parseBoolean(CONFIGPROP.getProperty("music"));
     }
 
     public double getSoundVolume() {
-        return Double.parseDouble(PROP.getProperty("soundValue"));
+        return Double.parseDouble(CONFIGPROP.getProperty("soundValue"));
     }
 
     public boolean getSound() {
-        return Boolean.parseBoolean(PROP.getProperty("sound"));
+        return Boolean.parseBoolean(CONFIGPROP.getProperty("sound"));
+    }
+    
+    public double getHeight() {
+        String a = CONFIGPROP.getProperty("resolution");
+        a = a.replace(" ", "");
+        String[] b = a.split("x");
+        return Double.parseDouble(b[1]);
+    }
+    
+    public double getWidth() {
+        String a = CONFIGPROP.getProperty("resolution");
+        a = a.replace(" ", "");
+        String[] b = a.split("x");
+        return Double.parseDouble(b[0]);
+    }
+    
+    public boolean isAutoResolution() {
+        return "auto".equals(CONFIGPROP.getProperty("resolution")); 
+    }
+    
+    public Properties getPROP() {
+        return CONFIGPROP;
     }
 }

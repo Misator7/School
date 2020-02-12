@@ -1,3 +1,4 @@
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -7,12 +8,16 @@ package pong;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 import pong.menu.Menu;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.beans.property.ObjectProperty;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -24,10 +29,13 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import pong.menu.DifMenu;
 import pong.menu.WinMenu;
 import pong.options.Document;
+import pong.scoreboard.Nickname;
 
 /**
  *
@@ -35,26 +43,24 @@ import pong.options.Document;
  */
 public class Pong extends Application {
 
-    private static final double W = 900, H = 600;
+    private static double W = 900, H = 600;
     private boolean backspace, enter, upm, downm, up1, down1, up2, down2, upb, rightb;
     private boolean pause = false;
+
+    private long startTime, gameTime, startPauseTime, pauseTime;
+    private int position;
 
     private AnimationTimer animationTimer, menuTimer, at, setTimer;
     private GraphicsContext gc;
     private Group plGround;
 
-    private Menu menu = new Menu(W, H);
+    private Menu menu;
     private Game game;
 
     @Override
     public void start(Stage stage) throws Exception {
         Document doc = new Document();
-//        String a = prop.getProperty("resolution");
-//        a = a.replace(" ", "");
-//        String[] b = a.split("x");
-//        W = Integer.parseInt(b[0]);
-//        H = Integer.parseInt(b[1]);
-        String path = "src\\pong\\background.mp3";
+        String path = "rsrc\\background.mp3";
         try {
             Media sound = new Media(new File(path).toURI().toString());
             MediaPlayer mediaPlayer = new MediaPlayer(sound);
@@ -64,8 +70,18 @@ public class Pong extends Application {
                 mediaPlayer.play();
             }
         } catch (Exception e) {
-            System.err.print(e);
+            System.err.println(e);
         }
+        if (doc.isAutoResolution()) {
+            Rectangle2D primaryScreenBounds = Screen.getPrimary().getVisualBounds();
+            W = primaryScreenBounds.getWidth();
+            H = primaryScreenBounds.getHeight() - 22;
+            stage.setMaximized(true);
+        } else {
+            W = doc.getWidth();
+            H = doc.getHeight();
+        }
+        menu = new Menu(W, H);
         stage.setTitle("Pong");
         Canvas canvas = new Canvas(W, H);
         plGround = new Group(canvas);
@@ -81,21 +97,37 @@ public class Pong extends Application {
                         backspace = false;
                         pause = false;
                         animationTimer.stop();
+                        game = null;
                         menu = new Menu(W, H);
                         menu();
                     }
                 } else {
+                    if (startTime == 0) {
+                        startTime = System.currentTimeMillis();
+                    }
                     game.animationHandle(gc,
                             up1, down1, up2, down2, pause);
                     switch (game.scoreChecking(W)) {
                         case 0:
+                            gameTime = System.currentTimeMillis() - pauseTime - startTime;
+                            startTime = 0;
+                            pauseTime = 0;
                             animationTimer.stop();
-                            menu = new WinMenu(W, H, gc, game, 250);
+                            menu = new WinMenu(W, H, gc, game, W / 5);
+                            if (game.getClass() == SinglePlayer.class) {
+                                scoreboard();
+                            }                            
                             menu();
                             break;
                         case 1:
+                            gameTime = System.currentTimeMillis() - pauseTime - startTime;
+                            startTime = 0;
+                            pauseTime = 0;
                             animationTimer.stop();
-                            menu = new WinMenu(W, H, gc, game, 600);
+                            menu = new WinMenu(W, H, gc, game, 4 * (W / 5));
+                            if (game.getClass() == SinglePlayer.class) {
+                                scoreboard();
+                            }
                             menu();
                             break;
                         case 2:
@@ -150,6 +182,12 @@ public class Pong extends Application {
                 down1 = true;
                 break;
             case P:
+                if (startPauseTime == 0) {
+                    startPauseTime = System.currentTimeMillis();
+                } else {
+                    pauseTime += System.currentTimeMillis() - startPauseTime;
+                    startPauseTime = 0;
+                }
                 pause = !pause;
         }
     }
@@ -195,7 +233,18 @@ public class Pong extends Application {
                             break;
                         case 2:
                             try {
-                                options();
+                                window("rsrc\\layout.fxml", "Options");
+                                game = null;
+                                menu = new Menu(W, H);
+                                menu();
+                            } catch (IOException ex) {
+                                Logger.getLogger(Pong.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                            break;
+                        case 3:
+                            try {
+                                window("rsrc\\scoreboard.fxml", "Scoreboard");
+                                game = null;
                                 menu = new Menu(W, H);
                                 menu();
                             } catch (IOException ex) {
@@ -240,14 +289,87 @@ public class Pong extends Application {
         at.start();
     }
 
-    public void options() throws IOException {
+    public void window(String path, String title) throws IOException {
         Stage dialog = new Stage();
-        Parent root = FXMLLoader.load(getClass().getResource("options//layout.fxml"));
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(new File(path).toURI().toURL());
+        Parent root = loader.load();
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setResizable(false);
         Scene dialogScene = new Scene(root);
-        dialog.setTitle("Options");
+        dialog.setTitle(title);
         dialog.setScene(dialogScene);
+        dialog.setOnHiding(event -> {
+            if (Nickname.nick != null) {
+                saveScoreboard();
+            }            
+        });
         dialog.show();
+    }
+
+    public void scoreboard() {
+        Document doc = new Document();
+        String[][] scoreboard = doc.getScoreboard();
+        int n;
+        int k = (scoreboard.length - 1) / 2;
+        int j = k;
+        boolean bool = true;
+        while (j != 0 && j != 9 && bool) {
+            n = j;
+            if (Float.parseFloat(scoreboard[j][1]) < gameTime) {
+                if (Float.parseFloat(scoreboard[j - 1][1]) > gameTime) {
+                    bool = false;
+                } else if (k > 1) {
+                    j -= k / 2;
+                } else {
+                    j -= k;
+                }
+            } else if (Float.parseFloat(scoreboard[j][1]) > gameTime) {
+                if (Float.parseFloat(scoreboard[j + 1][1]) < gameTime) {
+                    j++;
+                    bool = false;
+                }else if (Float.parseFloat(scoreboard[j + 1][1]) > gameTime && j == 8) {
+                    j += 2;
+                    bool = false;
+                } else if (k > 1) {
+                    j += k / 2;
+                } else {
+                    j += k;
+                }
+            }
+            if (n == j) {
+                k = 1;
+            } else {
+                k = Math.abs(j - n);
+            }
+        }
+        if (j < 10) {
+            position = j;
+            try {
+                window("rsrc\\name.fxml", "Nick");
+            } catch (IOException ex) {
+                Logger.getLogger(Pong.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+
+    public void saveScoreboard() {
+        System.out.println(position);
+        Document doc = new Document();
+        String[][] scoreboard = doc.getScoreboard();
+        Properties prop = new Properties();
+        for (int i = 0; i < position; i++) {
+            prop.setProperty(i + "name", scoreboard[i][0]);
+            prop.setProperty(i + "time", scoreboard[i][1]);
+        }
+        prop.setProperty(position + "name", Nickname.nick);
+        prop.setProperty(position + "time", Float.toString(gameTime));
+        for (int i = position; i < scoreboard.length - 1; i++) {
+            prop.setProperty(i + 1 + "name", scoreboard[i][0]);
+            prop.setProperty(i + 1 + "time", scoreboard[i][1]);
+        }
+        Nickname.nick = null;
+        position = 10;
+        doc.saveScoreboard(prop);
     }
 }

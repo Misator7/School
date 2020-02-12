@@ -24,7 +24,7 @@ public class Menu {
 
     protected Game game;
 
-    String[] item = new String[3];
+    String[] item = new String[4];
 
     protected double H, W;
 
@@ -41,13 +41,16 @@ public class Menu {
         if (up1 || up2) {
             switch (index) {
                 case 0:
-                    index = 2;
+                    index = 3;
                     break;
                 case 1:
                     index = 0;
                     break;
                 case 2:
                     index = 1;
+                    break;
+                case 3:
+                    index = 2;
                     break;
             }
             try {
@@ -64,6 +67,9 @@ public class Menu {
                     index = 2;
                     break;
                 case 2:
+                    index = 3;
+                    break;
+                case 3:
                     index = 0;
                     break;
             }
@@ -77,18 +83,19 @@ public class Menu {
         gc.fillRect(0, 0, W, H);
         gc.setFill(Color.WHITE);
         gc.setTextAlign(TextAlignment.CENTER);
-        gc.setFont(new Font(80));
+        gc.setFont(new Font(W/10));
         gc.fillText(getHeader(), W / 2, 150);
         gc.setLineWidth(5);
-        gc.strokeLine(60, 185, W - 60, 185);
+        gc.setLineDashes(null);
+        gc.strokeLine(60, H/3, W - 60, H/3);
         for (int i = 0; i < item.length; i++) {
             if (i == index) {
-                gc.setFont(new Font(45));
+                gc.setFont(new Font(W/40 + 20));
             } else {
-                gc.setFont(new Font(30));
+                gc.setFont(new Font(W/40));
             }
             gc.setStroke(Color.WHITESMOKE);
-            gc.fillText(item[i], W / 2, 300 + i * 70);
+            gc.fillText(item[i], W / 2, 300 + i * H/13);
         }
         return enter;
     }
@@ -101,6 +108,7 @@ public class Menu {
         item[0] = "1 Player";
         item[1] = "2 Players";
         item[2] = "Options";
+        item[3] = "Scoreboard";
     }
 
     /**

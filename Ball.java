@@ -15,19 +15,16 @@ import javafx.scene.paint.Color;
  */
 public class Ball {
 
-    /**
-     * @param speed the speed to set
-     */
-    public void setSpeed(double speed) {
-        this.speed = speed;
-    }
-
-    private double x, y, xSpeed, ySpeed, speed;
+    private double x, y, xSpeed, ySpeed, speed, speedSave;
     private final int diameter;
     private int radius;
     private Color color = Color.WHITESMOKE;
 
-    public Ball(double x, double y, int diameter, int speed) {
+    private final double[] vectorX = new double[7];
+    private final double[] vectorY = new double[7];
+    private int a;
+
+    public Ball(double x, double y, int diameter, double speed) {
         this.diameter = diameter;
         this.radius = diameter / 2;
         this.x = x;
@@ -35,14 +32,15 @@ public class Ball {
         this.xSpeed = speed;
         this.ySpeed = speed;
         this.speed = speed;
+        iniAngle();
         randomDirect();
     }
 
-    public void move(GraphicsContext gc) {
-        y += ySpeed;
+    public void move(GraphicsContext gc) {        
+        y += ySpeed;        
         x += xSpeed;
         gc.setFill(color);
-        gc.fillRect(getX(), y, getDiameter(), getDiameter());
+        gc.fillRect(x, y, diameter, diameter);
     }
 
     public void changeColor(GraphicsContext gc, Color color) {
@@ -52,17 +50,77 @@ public class Ball {
 
     private void randomDirect() {
         Random r = new Random();
+        updateDirect(6);
         if (r.nextBoolean()) {
-            xSpeed *= -1;
+            xSpeed *= -1;            
         }
         if (r.nextBoolean()) {
-            ySpeed *= -1;
+            changeYSpeed();
+        }
+    }
+    
+    public void updateSpeed() {
+        ySpeed = speed * vectorY[a];
+        if (xSpeed < 0) {
+            xSpeed = speed * vectorX[a] * -1;
+        } else {
+            xSpeed = speed * vectorX[a];
         }
     }
 
-    /**
-     * @return the x
-     */
+    public void updateDirect(int a) {
+        this.a = a;
+        ySpeed = speed * vectorY[a];
+        if (xSpeed < 0) {
+            xSpeed = speed * vectorX[a];
+        } else {
+            xSpeed = speed * vectorX[a] * -1;
+        }
+    }
+
+    public void changeYSpeed() {
+        switch (a) {
+            case 0:
+                a = 6;
+                break;
+            case 1:
+                a = 5;
+                break;
+            case 2:
+                a = 4;
+                break;
+            case 3:
+                break;
+            case 4:
+                a = 2;
+                break;
+            case 5:
+                a = 1;
+                break;
+            case 6:
+                a = 0;
+                break;
+        }
+        updateSpeed();
+    }
+
+    private void iniAngle() {
+        vectorX[0] = Math.cos(Math.toRadians(45));
+        vectorX[1] = Math.cos(Math.toRadians(30));
+        vectorX[2] = Math.cos(Math.toRadians(15));
+        vectorX[3] = 1;
+        vectorX[4] = vectorX[2];
+        vectorX[5] = vectorX[1];
+        vectorX[6] = vectorX[0];
+        vectorY[0] = Math.sin(Math.toRadians(45));
+        vectorY[1] = -0.5;
+        vectorY[2] = Math.sin(Math.toRadians(-15));
+        vectorY[3] = 0;
+        vectorY[4] = Math.sin(Math.toRadians(15));
+        vectorY[5] = 0.5;
+        vectorY[6] = Math.sin(Math.toRadians(-45));
+    }
+
     public double getX() {
         return x;
     }
@@ -149,5 +207,17 @@ public class Ball {
      */
     public double getSpeed() {
         return speed;
+    }
+
+    public double getSpeedSave() {
+        return speedSave;
+    }
+
+    public void setSpeedSave() {
+        speedSave = speed;
+    }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
     }
 }

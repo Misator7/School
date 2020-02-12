@@ -19,39 +19,31 @@ import pong.SinglePlayer;
  */
 public class WinMenu extends Menu {
 
-    private double sizeRestart = 15.5, extend = 0;
+    private double sizeRestart = 15.5;
     private Game originalGame;
 
-    public WinMenu(double H, double W, GraphicsContext gc, Game game, double xwinner) {
-        super(H, W);
+    public WinMenu(double W, double H, GraphicsContext gc, Game game, double xwinner) {
+        super(W, H);
         this.originalGame = game;
         gc.setFill(Color.BLACK);
         gc.fillRect(50, 37, 30, 30);
-        gc.fillRect(830, 37, 30, 30);
-        gc.setFill(Color.WHITESMOKE);
+        gc.fillRect(W - 70, 37, 30, 30);
+        gc.setFill(Color.WHITESMOKE);        
         gc.fillText(Integer.toString(game.getScoreR()), W - 60, 30);
         gc.fillText(Integer.toString(game.getScoreL()), 60, 30);
         gc.setFill(Color.GOLD);
         gc.setFont(new Font(60));
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
-        gc.fillText("Winner", xwinner, H / 2);
+        gc.fillText("Winner", xwinner, H / 4);
     }
 
     @Override
     public boolean menuTimerHandle(GraphicsContext gc,
             boolean up1, boolean up2, boolean down1, boolean down2,
             boolean enter, boolean backspace) {
-        if (extend % 5 == 0 && extend <= 25) {
-            sizeRestart += 0.1;
-        } else if (extend % 5 == 0 && extend <= 50) {
-            sizeRestart -= 0.1;
-        } else if (extend > 50) {
-            extend = 0;
-        }
-        extend++;
         gc.setFill(Color.BLACK);
-        gc.fillRect(340, H - 140, 225, 40);
+        gc.fillRect(W/2 - 110, H - 140, 225, 40);
         gc.setFill(Color.LIGHTGREY);
         gc.setFont(new Font(sizeRestart));
         gc.setTextAlign(TextAlignment.CENTER);
@@ -66,7 +58,7 @@ public class WinMenu extends Menu {
                 return true;
             }
         } else if (backspace) {
-            this.index = 3;
+            this.index = 10;
             return true;
         }
         return false;
