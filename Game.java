@@ -91,9 +91,8 @@ public class Game {
         gc.strokeLine(W / 2, 0, W / 2, H);
         gc.setFont(new Font(30));
         gc.setTextAlign(TextAlignment.CENTER);
-        gc.setTextBaseline(VPos.TOP);
-        gc.fillText(Integer.toString(this.getScoreR()), W - 60, 30);
-        gc.fillText(Integer.toString(this.getScoreL()), 60, 30);
+        gc.fillText(Integer.toString(this.getScoreR()), W - 60, 60);
+        gc.fillText(Integer.toString(this.getScoreL()), 60, 60);
         Iterator<BasicPowerBlock> it = pb.iterator();
         while (it.hasNext()) {
             BasicPowerBlock d = it.next();
@@ -237,9 +236,8 @@ public class Game {
         gc.strokeLine(W / 2, 0, W / 2, H);
         gc.setFont(new Font(30));
         gc.setTextAlign(TextAlignment.CENTER);
-        gc.setTextBaseline(VPos.TOP);
-        gc.fillText(Integer.toString(0), W - 60, 30);
-        gc.fillText(Integer.toString(0), 60, 30);
+        gc.fillText("0", W - 60, 60);
+        gc.fillText("0", 60, 60);
     }
 
     public int getWinningScore() {

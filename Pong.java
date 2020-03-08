@@ -14,10 +14,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
-import javafx.beans.property.ObjectProperty;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Rectangle2D;
+import javafx.geometry.VPos;
 import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -31,7 +30,6 @@ import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import pong.menu.DifMenu;
 import pong.menu.WinMenu;
 import pong.options.Document;
@@ -225,7 +223,6 @@ public class Pong extends Application {
                     switch (menu.getResult()) {
                         case 0:
                             game = new SinglePlayer(W, H);
-                            game.fillFrame(gc);
                             break;
                         case 1:
                             game = new Game(W, H);
@@ -271,12 +268,12 @@ public class Pong extends Application {
     }
 
     public void singlePlayer() {
-        DifMenu difmenu = new DifMenu(W, H);
+        menu = new DifMenu(W, H);
         at = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                if (difmenu.menuTimerHandle(gc, up1, up2, down1, down2, enter, backspace)) {
-                    game.setDifficulty(difmenu.getResult());
+                if (menu.menuTimerHandle(gc, up1, up2, down1, down2, enter, backspace)) {
+                    game.setDifficulty(menu.getResult());
                     at.stop();
                     animationTimer.start();
                 } else if (backspace) {

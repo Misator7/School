@@ -35,9 +35,11 @@ public class DifMenu extends Menu {
     }
 
     @Override
-    protected void initItems() {
-        item[0] = "Easy";
-        item[1] = "Medium";
-        item[2] = "Hard";
+    protected String[] initItems() {
+        String[] a = new String[3];
+        a[0] = "Easy";
+        a[1] = "Medium";
+        a[2] = "Hard";
+        return a;
     }
 }
